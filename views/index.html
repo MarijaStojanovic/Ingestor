@@ -1,0 +1,42 @@
+<!DOCTYPE hmtl>
+
+<html>
+
+<head>
+  <title>Ingestor</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+  <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+    <div class="container">
+      <a class="navbar-brand" href="#">INGESTOR</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <form id="upload-file">
+      <div class="form-group">
+        <label for="exampleFormControlFile1">Please upload xls or xlsx:</label>
+        <input type="file" class="form-control-file" id="file" name="file">
+      </div>
+      <div class="form-group" id="#loading-custom-overlay">
+        <button type="submit" class="btn btn-primary mb-2">Upload</button>
+      </div>
+      <div class="form-group" id="progress-bar">
+        <progress value="0" max="100">0 %</progress>
+      </div>
+    </form>
+  </div>
+
+
+  <script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="js/index.js"></script>
+</body>
+
+</html>
