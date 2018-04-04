@@ -29,7 +29,7 @@ function uploadHandler(req, res, db, uploadFile = uploadFileToFileSystem) {
 
       const workbook = xlsx.readFile(path.join(uploadDir, filename));
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames], { header: 1 })
-      data.forEach(([clientName, clientId, inputData, amount, fileMetaDataId, fileName, dataToSplit]) => {
+      data.slice(1).forEach(([clientName, clientId, inputData, amount, fileMetaDataId, fileName, dataToSplit]) => {
         const [source, provider] = dataToSplit.split(':');
         const [, amountNumber] = amount.split('$');
         const amountToSave = Number(amountNumber.replace(',', ''))
