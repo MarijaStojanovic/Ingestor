@@ -55,7 +55,9 @@ function uploadHandler(req, res, db, uploadFile = uploadFileToFileSystem) {
       Promise.all([
         clients.map(client => { db.collection('client').update({ _id: client.clientId }, { $set: { clientName: client.clientName } }, { upsert: true }) }),
         db.collection('requirement').insertMany(requirements),
-        db.collection('file').insertMany(fileMetaData)
+        db.collection('file').insertMany(fileMetaData),
+        db.collection('file').createIndex({ fileMetaDataId: 1 }),
+        db.collection('requirement').createIndex({ clientId: 1 })
       ])
 
       resolve({
