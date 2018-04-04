@@ -21,6 +21,8 @@ function uploadHandler(req, res, db, uploadFile = uploadFileToFileSystem) {
       }
 
       const { filename } = req.file;
+      const requirements = [];
+      const fileMetaData = [];
       const clients = [];
 
       const uploadDir = path.join(os.tmpdir(), 'ingestor/uploads');
@@ -29,11 +31,20 @@ function uploadHandler(req, res, db, uploadFile = uploadFileToFileSystem) {
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames], { header: 1 })
       data.forEach(([clientName, clientId, inputData, amount, fileMetaDataId, fileName, dataToSplit]) => {
         const [source, provider] = dataToSplit.split(':');
+        const [, amountNumber] = amount.split('$');
+        const amountToSave = Number(amountNumber.replace(',', ''))
+
         clients.push({
+          clientId,
           clientName,
+        });
+        requirements.push({
           clientId,
           inputData,
-          amount,
+          fileMetaDataId,
+          amount: amountToSave,
+        });
+        fileMetaData.push({
           fileMetaDataId,
           fileName,
           source,
@@ -41,7 +52,11 @@ function uploadHandler(req, res, db, uploadFile = uploadFileToFileSystem) {
         });
       })
 
-      db.collection('client').insertMany(clients);
+      Promise.all([
+        clients.map(client => { db.collection('client').update({ _id: client.clientId }, { $set: { clientName: client.clientName } }, { upsert: true }) }),
+        db.collection('requirement').insertMany(requirements),
+        db.collection('file').insertMany(fileMetaData)
+      ])
 
       resolve({
         message: 'File is successfuly uploaded',

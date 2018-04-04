@@ -1,43 +1,49 @@
 'use strict';
 
 const path = require('path');
-const ObjectId = require('mongodb').ObjectID;
 
 async function getSingleClient(req, res, db) {
   const { clientId } = req.params;
 
   const client = db.collection('client');
+  const requirement = db.collection('requirement');
 
-  const clientUser = await client.find({ _id: new ObjectId(clientId) }).toArray();
-
-  if (!clientUser.length) {
+  const [{ _id, clientName }] = await client.find({ _id: clientId }).toArray();
+  if (!_id) {
     throw 'Client not found';
   }
-  const [user] = await client.aggregate([
+  const [user] = await requirement.aggregate([
     {
       $match: {
-        clientId: clientUser[0].clientId,
+        clientId: _id,
       }
+    },
+    {
+      $lookup:
+        {
+          from: 'file',
+          localField: 'fileMetaDataId',
+          foreignField: 'fileMetaDataId',
+          as: 'fileData'
+        }
     },
     {
       $group: {
         _id: '$clientId',
-        clients: { $push: '$$ROOT' },
         totalAmount: {
           $sum: '$amount'
         },
         files: {
-          $push: '$fileName'
+          $push: '$fileData.fileName'
         },
         count: {
           $sum: 1,
         },
-      }
-    },
+      },
+    }
   ]).toArray();
-  user.name = clientUser[0].clientName;
+  user.name = clientName;
   return user;
-
 }
 
 module.exports = getSingleClient;

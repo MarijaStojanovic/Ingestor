@@ -4,12 +4,13 @@ const path = require('path');
 const { escapeRegExp } = require('../helpers/escapeSearch');
 
 async function getClients(req, res, db) {
-  const { filterBy, sortBy, skip = 0 } = req.query;
+  const { filterBy, sortBy, skip = 0, direction } = req.query;
   let { limit = 50 } = req.query;
 
-  const client = db.collection('client')
+  const requirement = db.collection('requirement');
+
   const query = {};
-  const sort = {};
+  const sort = { createdAt: 1 };
 
   if (limit > 50) {
     limit = 50;
@@ -28,12 +29,51 @@ async function getClients(req, res, db) {
     ];
   }
 
-  return await client
-    .find(query)
-    .sort(sort)
-    .skip(Number(skip))
-    .limit(Number(limit))
-    .toArray();
+  return await requirement.aggregate([
+    {
+      $match: query
+    },
+    {
+      $lookup:
+        {
+          from: 'client',
+          localField: 'clientId',
+          foreignField: '_id',
+          as: 'name'
+        }
+    },
+    {
+      $lookup:
+        {
+          from: 'file',
+          localField: 'fileMetaDataId',
+          foreignField: 'fileMetaDataId',
+          as: 'files'
+        }
+    },
+    {
+      $project: {
+        _id: '$name._id',
+        clientId: 1,
+        amount: 1,
+        inputData: 1,
+        fileMetaDataId: 1,
+        fileName: '$files.fileName',
+        source: '$files.source',
+        provider: '$files.provider',
+        clientName: '$name.clientName',
+      },
+    },
+    {
+      $sort: sort
+    },
+    {
+      $limit: Number(limit)
+    },
+    {
+      $skip: Number(skip),
+    },
+  ]).toArray();
 }
 
 module.exports = getClients;
